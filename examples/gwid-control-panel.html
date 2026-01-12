@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>GWID Control Panel</title>
+  <style>
+    body { 
+      font-family: system-ui, -apple-system, sans-serif; 
+      margin: 20px; max-width: 1200px; 
+    }
+    input, textarea, select, button { 
+      width: 100%; box-sizing: border-box; padding: 8px; 
+      margin: 4px 0; font-family: inherit; 
+    }
+    button { 
+      background: #007aff; color: white; border: none; 
+      border-radius: 6px; cursor: pointer; font-size: 14px; 
+    }
+    button:hover { background: #0056cc; }
+    button:disabled { background: #ccc; cursor: not-allowed; }
+    #requestUrl { height: 40px; font-family: monospace; font-size: 12px; resize: none; }
+    #response { height: 100px; font-family: monospace; font-size: 12px; }
+    label { display: block; margin: 12px 0 4px; font-weight: 600; }
+    .section { margin: 20px 0; padding: 16px; border: 1px solid #ddd; border-radius: 8px; }
+    .button-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(60px, 1fr)); gap: 8px; }
+    .flex-container {display: flex; justify-content: space-between; gap: 10px;}
+    .flex-container label,
+    .flex-container input,
+    .flex-container button {width: min-content; white-space: nowrap; padding: 8px; margin: 0; /* Ensures no default margins interfere */}
+    .flex-container input {flex-grow: 1;}
+    .flex-container label {white-space: nowrap;}
+
+    h1 { color: #333; }
+    h2 { color: #007aff; margin-top: 0; }
+  </style>
+</head>
+<body>
+  <h1>General-purpose WiFi-connected Indicator Device (GWID) Control Panel</h1>
+
+  <div class="flex-container">
+    <label for="ip">IP address:</label>
+    <input
+      id="ip"
+      type="text"
+      maxlength="15"
+      placeholder="192.168.0.0"
+      required
+      pattern="^((\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.){3}(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])$">
+      <button onclick="sendRequest('/getversion')">Get Version</button>
+      <button onclick="sendRequest('/getstate')">Get Current State</button>
+  </div>
+
+  <div class="section">
+    <h2>Select Display Mode</h2>
+      <div class="button-grid">
+        <button onclick="sendRequest('/?flash')">Flash</button>
+        <button onclick="sendRequest('/?police')">Police</button>      
+        <button onclick="sendRequest('/?pulse')">Pulse</button>
+        <button onclick="sendRequest('/?rainbow')">Rainbow</button>
+        <button onclick="sendRequest('/?rotor')">Rotor</button>
+        <button onclick="sendRequest('/?solid')">Solid</button>
+        <button onclick="sendRequest('/?sos')">SOS</button>
+        <button onclick="sendRequest('/?strobe')">Strobe</button>
+        <button onclick="sendRequest('/?trail')">Trail</button>
+      </div>
+  </div>
+
+  <div class="section">
+    <h2>Settings</h2>
+    <div class="button-grid">
+      <label>Color:</label>
+      <button onclick="sendRequest('/?rgb=ff0000')">Red</button>
+      <button onclick="sendRequest('/?rgb=00ff00')">Green</button>
+      <button onclick="sendRequest('/?rgb=0000ff')">Blue</button>
+      <button onclick="sendRequest('/?rgb=ffff00')">Yellow</button>
+      <button onclick="sendRequest('/?rgb=00ffff')">Cyan</button>
+      <button onclick="sendRequest('/?rgb=ff00ff')">Purple</button>
+      <button onclick="sendRequest('/?rgb=ffffff')">White</button>
+      <button onclick="sendRequest('/?rgb=000000')">None</button>
+    </div>
+    <div class="button-grid">
+      <label>Level:</label>
+      <button onclick="sendRequest('/?level=0')">0</button>
+      <button onclick="sendRequest('/?level=10')">10</button>
+      <button onclick="sendRequest('/?level=25')">25</button>
+      <button onclick="sendRequest('/?level=50')">50</button>
+      <button onclick="sendRequest('/?level=75')">75</button>
+      <button onclick="sendRequest('/?level=100')">100</button>
+    </div>
+    <div class="button-grid">
+      <label>Speed:</label>
+      <button onclick="sendRequest('/?speed=0')">0</button>
+      <button onclick="sendRequest('/?speed=1')">1</button>
+      <button onclick="sendRequest('/?speed=2')">2</button>
+      <button onclick="sendRequest('/?speed=3')">3</button>
+      <button onclick="sendRequest('/?speed=4')">4</button>
+    </div>
+    <div class="button-grid">
+      <label>Tone:</label>
+      <button onclick="sendRequest('/?tone=off')">Off</button>
+      <button onclick="sendRequest('/?tone=on')">On</button>      
+    </div>
+    <hr>
+    <div class="flex-container">
+        <label>Custom:</label>
+	<input id="customResourceRequest" type="text" placeholder="Type custom resource request here">
+	<button onclick="sendCustomRequest()">Submit</button>
+    </div>
+  </div>
+
+  <label for="requestUrl">HTTP URL Called</label>
+  <textarea id="requestUrl" readonly placeholder="Click a button to see the full URL..."></textarea>
+
+  <label for="response">Server Response</label>
+  <textarea id="response" readonly placeholder="Response will appear here..."></textarea>
+
+  <script>
+
+     async function sendCustomRequest() {
+        const ipField = document.getElementById('ip');
+        const inputValue = document.getElementById('customResourceRequest').value;
+        const requestField = document.getElementById('requestUrl');
+        const responseField = document.getElementById('response');
+
+      	const ip = ipField.value.trim();
+        if (!ip) {
+          alert('Please enter an IP address first');
+          return;
+        }
+
+        if (inputValue.trim() == '') {
+           alert ('Please enter a value.');
+           return;
+	}
+
+        const url = `http://${ip}${inputValue}`;
+        requestField.value = url;
+        await sendFetch(url, requestField, responseField);
+      }
+
+
+    async function sendRequest(path) {
+      const ipField = document.getElementById('ip');
+      const requestField = document.getElementById('requestUrl');
+      const responseField = document.getElementById('response');
+      
+      const ip = ipField.value.trim();
+      if (!ip) {
+        alert('Please enter an IP address first');
+        return;
+      }
+
+      const url = `http://${ip}${path}`;
+      requestField.value = url;
+
+      await sendFetch(url, requestField, responseField);
+    }
+
+
+    async function sendFetch(url, requestField, responseField) {
+      // Disable all buttons during request
+      const buttons = document.querySelectorAll('button');
+      buttons.forEach(btn => btn.disabled = true);
+      
+      responseField.value = `Sending GET ${url}...`;
+
+      try {
+        const res = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'Accept': 'text/plain, application/json, text/html;q=0.9, */*;q=0.5'
+          }
+        });
+        
+        const text = await res.text();
+        responseField.value = `Status: ${res.status} ${res.statusText}\n\n${text}`;
+        
+      } catch (error) {
+        responseField.value = `Error: ${error.message}\n\nCommon causes:\n• Device not reachable\n• Wrong IP/port\n• CORS not enabled on ESP8266`;
+      }
+      
+      // Re-enable buttons
+      buttons.forEach(btn => btn.disabled = false);
+    }
+
+    // Auto-focus IP field
+    document.getElementById('ip').focus();
+  </script>
+</body>
+</html>
