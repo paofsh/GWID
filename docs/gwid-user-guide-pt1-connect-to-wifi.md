@@ -52,39 +52,40 @@ functionality, though this typically requires a custom driver.
 
     - Click the Save button
 
-    - NOTE: That same configuration page has fields for the home automation
-      hub's static IP address and Port. Leaving these fields blank (i.e.,
-      null values) does not limit the user's ability to control the device
-      directly via HTTP. The user can also update these values on the
-      device at a later time via HTTP message.
-
   - Once the user clicks the Save button, the GWID will attempt to connect
     to the WiFi network using the supplied SSID and password. Success of this
     initial connection usually happens within seconds, and is indicated by
-    a single green pixel flashing four times on the device.\
-    \
-    NOTE: If after a minute or so the device continues to display a
-    single red pixel or nothing at all, that means that the device has
-    not been able to connect to the network with the SSID and password
-    that the user specified via the access portal. Manually RESET the
-    device (see below) and repeat STEP 2 from the top.
+    two green pixels, one solid and the other flashing four times.
 
   - After the GWID establishes a successful WiFi connection for the
     first time, it will reboot. The device will now automatically
     reconnect to the configured WiFi network after every reboot until
     the network configuration is RESET by the user.
 
+  - If the connection failed, the device will display a solid red pixel at
+    the top and flashing red pixel at the bottom. The device will then reboot
+    back into the configuration mode in order to re-enter the WiFi
+    credentials.
+
 - GWID indications during normal bootup
 
-  - When the GWID reboots, it will first display a single yellow pixel
+  - When the GWID boots up, it will display a single yellow pixel
     to indicate that is attempting to connect to the network using the
     saved WiFi credentials. This usually takes a couple of seconds.
 
+  - If the GWID fails to connect to the network, it will display a solid
+    yellow pixel at the top and a flashing yellow pixel at the bottom. It
+    will then reboot. If the connection fails after multiple reboots, press
+    the reset button to restart the device in configuration mode.
+
   - Once the GWID is connected to WiFi it will display a single green
-    pixel. 
+    pixel.
 
   - When the GWID is fully initialized and ready to accept commands
-    it will display a single blue pixel.
+    it will display a blue pixel at position 0.  Additionally if 
+    IP/Port information has been saved to the device, pixel position 6 
+    will display blue (device control is not restricted to the saved IP/Port) or red
+    (device control is restricted to the saved IP/Port)
     
 - **Once the GWID is connected to WiFi, the user can send commands to
    the device via HTTP from a browser window on computer, laptop or cell
@@ -102,11 +103,10 @@ functionality, though this typically requires a custom driver.
 ## How to "factory reset" the device to erase WiFi credentials and all saved settings
 
   - To reset (delete) WiFi credentials from the GWID's flash memory and reboot
-    the device into WiFi configuration mode, press and hold the reset button for
-    three seconds while the device is connected to power.
- 
-  - Alternatively, 1) disconnect the GWID from its power source, 2) press and hold
-    the reset button, 3) reconnect the device to power, then 4) release the reset button.
+    the device into WiFi configuration mode, press the reset button while the
+    device is connected to power. If that does not work, 1) disconnect the GWID
+    from its power source, 2) press and hold the reset button, 3) reconnect the
+    device to power, then 4) release the reset button.
 
   - A "factory reset" will also erase saved IP and Port values and IP restrictions
     from the device
